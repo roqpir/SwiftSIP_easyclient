@@ -23,7 +23,7 @@ let package = Package(
             name: "Controller",
             dependencies: ["libpjproject"],
             cxxSettings: [
-                .define("PJ_AUTOCONF")
+                /* Ohne PJ_AUTOCONF erkennt config.h die Architektur (__x86_64__/__aarch64__) selbst. */
             ],
             linkerSettings: [
                 .linkedFramework("Network"),
