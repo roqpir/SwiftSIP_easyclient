@@ -1,6 +1,5 @@
 //
 //  SIPController.h
-//  
 //
 //  Created by Oliver Epper on 22.08.22.
 //
@@ -21,11 +20,15 @@ typedef NSString * _Nonnull(^PasswordFunction)(void);
 @property OnCallStateCallback onCallStateCallback;
 
 - (instancetype)init;
-- (instancetype)initWithUserAgent:(NSString* )userAgent NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithUserAgent:(NSString *)userAgent NS_DESIGNATED_INITIALIZER;
 
 - (void)createTransportWithType:(pjsip_transport_type_e)type andPort:(int)port;
 - (void)createTransportUsingSRVLookupWithType:(pjsip_transport_type_e)type;
 - (void)createAccountOnServer:(NSString *)servername forUser:(NSString *)user withPassword:(PasswordFunction)passwordFunction;
+
+/// Account ohne Registrierung (nur für Anrufe). Params: identityUri, contactUri (optional), username, password (optional), ha1 (optional), realm.
+- (void)createAccountForCallsOnlyWithParams:(NSDictionary *)params;
+
 - (void)libStart;
 
 - (void)onIncomingCall:(pjsua_call_id)callId;
@@ -41,10 +44,8 @@ typedef NSString * _Nonnull(^PasswordFunction)(void);
 - (void)testAudio:(int)forSeconds;
 
 + (void)dumpAudioDevices;
-
 + (void)dumpCodecs;
 
 @end
 
 NS_ASSUME_NONNULL_END
-

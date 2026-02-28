@@ -107,6 +107,51 @@
     [self dumpAccount];
 }
 
+- (void)createAccountForCallsOnlyWithParams:(NSDictionary *)params
+{
+    NSString *identityUri = params[@"identityUri"];
+    NSString *contactUri = params[@"contactUri"];
+    NSString *username = params[@"username"];
+    NSString *password = params[@"password"];
+    NSString *ha1 = params[@"ha1"];
+    NSString *realm = params[@"realm"] ?: @"*";
+
+    if (!identityUri.length || !username.length) {
+        NSLog(@"SwiftSIP createAccountForCallsOnly: identityUri und username erforderlich.");
+        return;
+    }
+
+    SIPController *object = self;
+    self.account = new Account(object);
+
+    pj::AccountConfig cfg;
+    cfg.mediaConfig.srtpUse = PJMEDIA_SRTP_OPTIONAL;
+    cfg.idUri = [identityUri UTF8String];
+
+    pj::AuthCredInfo credInfo;
+    credInfo.realm = std::string([realm UTF8String]);
+    credInfo.username = [username UTF8String];
+    if (ha1.length) {
+        credInfo.dataType = 1;  // PJSIP_CRED_DATA_DIGEST / HA1
+        credInfo.data = [ha1 UTF8String];
+    } else if (password.length) {
+        credInfo.dataType = 0;  // PJSIP_CRED_DATA_PLAIN_PASSWD
+        credInfo.data = [password UTF8String];
+    } else {
+        NSLog(@"SwiftSIP createAccountForCallsOnly: ha1 oder password erforderlich.");
+        return;
+    }
+    cfg.sipConfig.authCreds.push_back(credInfo);
+
+    cfg.regConfig.registrarUri = "";
+
+    if (contactUri.length) {
+        cfg.sipConfig.contactParams = std::string([contactUri UTF8String]);
+    }
+
+    self.account->create(cfg, false);
+}
+
 - (void)libStart
 {
     pj::Endpoint::instance().libStart();
